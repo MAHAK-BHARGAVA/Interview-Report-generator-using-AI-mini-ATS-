@@ -1,6 +1,6 @@
 import express from "express"
-import authMiddleware from "../middlewares/auth.js"
-import interviewcontroller from "../controllers/interviewcontroller.js"
+import authuser from "../middlewares/auth.js"
+import generateinterviewreportcontroller from "../controllers/interviewcontroller.js"
 import upload from "../middlewares/filemiddleware.js"
 const interviewRouter = express.Router()
 
@@ -11,5 +11,5 @@ const interviewRouter = express.Router()
  * @access.private
  * 
  */
-interviewRouter.post("/",authMiddleware.authuser,upload.single("resume"),interviewcontroller.generateinterviewreportcontroller)
+interviewRouter.post("/",authuser,upload.single("resume"),generateinterviewreportcontroller)
 export default interviewRouter; 
