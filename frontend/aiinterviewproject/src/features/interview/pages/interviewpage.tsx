@@ -1,4 +1,6 @@
 import { useState } from "react";
+import type { InterviewReport } from "../interview.context"
+//                                   ^^^^ adjust path to match your folder structure
 
 type Severity = "High" | "Medium" | "Low";
 
@@ -18,20 +20,15 @@ interface SkillGap {
 interface RoadmapItem {
   day: number;
   focus: string;
-  task: string;
+  tasks: string[];
 }
 
-interface InterviewReport {
-  matchscore: number;
-  technicalQuestions: QuestionItem[];
-  behavioralQuestions: QuestionItem[];
-  skillGaps: SkillGap[];
-  PreparationPlan: RoadmapItem[];
-}
 
 // ─── Mock Data (mirrors the interviewReportSchema) ───────────────────────────
 const mockReport: InterviewReport = {
-  matchscore: 85,
+  _id: "mock-id",           // ✅ add this
+  title: "Software Developer",
+  matchScore: 85,
   technicalQuestions: [
     {
       question: "Implement a consistent hashing strategy for a distributed cache.",
@@ -78,14 +75,14 @@ const mockReport: InterviewReport = {
     { skill: "Event Loop", severity: "Low" },
     { skill: "TypeScript Generics", severity: "Medium" },
   ],
-  PreparationPlan: [
-    { day: 1, focus: "Data Structures", task: "Solve 5 LeetCode medium array/hash-map problems. Read CLRS Ch.11 on hash tables." },
-    { day: 2, focus: "System Design", task: "Read 'Designing Data-Intensive Applications' Ch.5–6. Sketch a URL shortener architecture." },
-    { day: 3, focus: "Redis Deep Dive", task: "Complete Redis University RU101 course. Implement a rate-limiter with ioredis." },
-    { day: 4, focus: "Message Queues", task: "Set up a local RabbitMQ instance. Build a producer-consumer demo with retry logic." },
-    { day: 5, focus: "Behavioural Prep", task: "Write STAR answers for 6 common leadership scenarios. Record yourself and review." },
-    { day: 6, focus: "Mock Interview", task: "Schedule a 60-min mock on Pramp. Time yourself on 2 system design prompts." },
-    { day: 7, focus: "Review & Rest", task: "Revisit flashcards for all skill gaps. Light reading only — no new material." },
+  preparationPlan: [
+    { day: 1, focus: "Data Structures", tasks:[ "Solve 5 LeetCode medium array/hash-map problems. Read CLRS Ch.11 on hash tables." ]},
+    { day: 2, focus: "System Design", tasks:[ "Read 'Designing Data-Intensive Applications' Ch.5–6. Sketch a URL shortener architecture."] },
+    { day: 3, focus: "Redis Deep Dive", tasks: ["Complete Redis University RU101 course. Implement a rate-limiter with ioredis."] },
+    { day: 4, focus: "Message Queues", tasks: ["Set up a local RabbitMQ instance. Build a producer-consumer demo with retry logic."] },
+    { day: 5, focus: "Behavioural Prep", tasks: ["Write STAR answers for 6 common leadership scenarios. Record yourself and review."] },
+    { day: 6, focus: "Mock Interview", tasks: ["Schedule a 60-min mock on Pramp. Time yourself on 2 system design prompts."] },
+    { day: 7, focus: "Review & Rest", tasks: ["Revisit flashcards for all skill gaps. Light reading only — no new material."] },
   ],
 };
 
@@ -254,9 +251,13 @@ function RoadmapCard({ item }: { item: RoadmapItem }) {
             fontFamily: "Inter", fontSize: 9, fontWeight: 700, color: "#76777d",
             textTransform: "uppercase", letterSpacing: "0.08em", flexShrink: 0, paddingTop: 2,
           }}>Task</span>
-          <p style={{ fontFamily: "Inter", fontSize: 13, color: "#45464d", lineHeight: "20px", margin: 0 }}>
-            {item.task}
-          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {item.tasks.map((t, i) => (
+            <p key={i} style={{ fontFamily: "Inter", fontSize: 13, color: "#45464d", lineHeight: "20px", margin: 0 }}>
+              • {t}
+            </p>
+          ))}
+        </div>
         </div>
       </div>
     </div>
@@ -280,10 +281,10 @@ function OverviewView({ report }: { report: InterviewReport }) {
       {/* Stats row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 32 }}>
         {[
-          { label: "Match Score", value: `${report.matchscore}%`, icon: "emoji_events", accent: "#0058be" },
+          { label: "Match Score", value: `${report.matchScore}%`, icon: "emoji_events", accent: "#0058be" },
           { label: "Questions Ready", value: total, icon: "quiz", accent: "#191c1e" },
           { label: "High-Priority Gaps", value: highGaps, icon: "warning", accent: "#ba1a1a" },
-          { label: "Prep Days", value: report.PreparationPlan.length, icon: "calendar_month", accent: "#45464d" },
+          { label: "Prep Days", value: report.preparationPlan.length, icon: "calendar_month", accent: "#45464d" },
         ].map(s => (
           <div key={s.label} style={{
             background: "white", border: "1px solid #e2e8f0", borderRadius: 10, padding: 20,
@@ -302,7 +303,7 @@ function OverviewView({ report }: { report: InterviewReport }) {
           background: "white", border: "1px solid #e2e8f0", borderRadius: 10, padding: 32,
           boxShadow: "0 2px 8px rgba(15,23,42,0.04)", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          <MatchScoreRing score={report.matchscore} />
+          <MatchScoreRing score={report.matchScore} />
         </div>
         <div style={{
           background: "white", border: "1px solid #e2e8f0", borderRadius: 10, padding: 24,
@@ -419,7 +420,7 @@ function RoadmapView({ plan }: { plan: RoadmapItem[] }) {
 
 // ─── Root Component ───────────────────────────────────────────────────────────
 
-export default function InterviewReportUI({ report = mockReport }) {
+export default function InterviewReportUI({ report = mockReport } : {report?: InterviewReport}) {
   const [activeNav, setActiveNav] = useState("overview");
 
   const renderView = () => {
@@ -428,7 +429,7 @@ export default function InterviewReportUI({ report = mockReport }) {
       case "technical":  return <QuestionsView questions={report.technicalQuestions} type="technical" />;
       case "behavioral": return <QuestionsView questions={report.behavioralQuestions} type="behavioral" />;
       case "gaps":       return <SkillGapsView gaps={report.skillGaps} />;
-      case "roadmap":    return <RoadmapView plan={report.PreparationPlan} />;
+      case "roadmap":    return <RoadmapView plan={report.preparationPlan} />;
       default:           return null;
     }
   };
@@ -535,7 +536,7 @@ export default function InterviewReportUI({ report = mockReport }) {
                 background: "rgba(0,88,190,0.07)", border: "1px solid rgba(0,88,190,0.2)",
               }}>
                 <span style={{ fontFamily: "Inter", fontSize: 10, fontWeight: 700, color: "#0058be", textTransform: "uppercase", letterSpacing: "0.06em" }}>Match</span>
-                <span style={{ fontFamily: "Hanken Grotesk", fontSize: 17, fontWeight: 700, color: "#191c1e" }}>{report.matchscore}</span>
+                <span style={{ fontFamily: "Hanken Grotesk", fontSize: 17, fontWeight: 700, color: "#191c1e" }}>{report.matchScore}</span>
                 <span style={{ fontFamily: "Inter", fontSize: 10, color: "#76777d" }}>/100</span>
               </div>
               {/* Avatar */}
