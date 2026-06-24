@@ -313,29 +313,31 @@ export function Navbar() {
     cursor: "pointer",
   };
 
-  return (
-    <nav style={navStyle}>
-      <span
-        style={{
-          fontWeight: 800,
-          fontSize: 18,
-          color: tokens.primary,
-          letterSpacing: "-0.3px",
-        }}
-      >
+    return (
+  <>
+    <style>{`
+      @media (max-width: 768px) {
+        .rai-navbar { padding: 0 16px !important; gap: 8px !important; }
+        .rai-navbar span { font-size: 16px !important; }
+        .rai-nav-links { gap: 14px !important; }
+        .rai-nav-links a, .rai-nav-links button { font-size: 12px !important; white-space: nowrap; }
+        .rai-main-grid { grid-template-columns: 1fr !important; }
+      }
+    `}</style>
+    <nav style={navStyle} className="rai-navbar">
+      <span style={{ fontWeight: 800, fontSize: 18, color: tokens.primary, letterSpacing: "-0.3px" }}>
         RecruitAI
       </span>
-      <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-      <button onClick={() => navigate("/reports")}>My Reports</button>
-        <a href="#" style={navLinkStyle}>
-          How it Works
-        </a>
+      <div style={{ display: "flex", alignItems: "center", gap: 32 }} className="rai-nav-links">
+        <button onClick={() => navigate("/reports")} style={navLinkStyle}>My Reports</button>
+        <a href="#" style={navLinkStyle}>How it Works</a>
         <button style={avatarBtnStyle} aria-label="User profile">
           <UserIcon />
         </button>
       </div>
     </nav>
-  );
+  </>
+);
 }
 
 // ─── HeroSection ─────────────────────────────────────────────
@@ -785,6 +787,7 @@ export function Home() {
         }}
       >
         <div
+          className="rai-main-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",
