@@ -20,8 +20,6 @@ interface RegisterFieldErrors {
   acceptedTerms?: string;
 }
 
-const defaultOnSubmit = async () => {};
-
 const validateEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
 const validateName = (value: string) => /^[A-Za-z ]{2,}$/.test(value);
 const validatePassword = (value: string) =>
