@@ -35,10 +35,10 @@ async function register(req, res) {
     );
 
     res.cookie("token", token, {
-      httpOnly: true,                  // Protects against XSS attacks
-      secure: process.env.NODE_ENV === "production", // Set to true only on HTTPS production
-      sameSite: "lax",                 // Required to allow cross-origin sharing on localhost
-      maxAge: 60 * 60 * 1000,          // 1 hour matching JWT
+      httpOnly: true,
+      secure: true, // must be true (not conditional) — required when sameSite is "none"
+      sameSite: "none", // required for cross-domain cookies
+      maxAge: 60 * 60 * 1000,
     });
     res.status(201).json({
       message: "User registered successfully",
@@ -76,12 +76,12 @@ async function login(req, res) {
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
-   
+
     //storrs it safely in browser cookie with security flags
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true, // must be true (not conditional) — required when sameSite is "none"
+      sameSite: "none", // required for cross-domain cookies
       maxAge: 60 * 60 * 1000,
     });
     res.status(200).json({
@@ -113,7 +113,7 @@ async function logout(req, res) {
 async function getme(req, res) {
   try {
     const user = await userModel.findById(req.user.id);
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
