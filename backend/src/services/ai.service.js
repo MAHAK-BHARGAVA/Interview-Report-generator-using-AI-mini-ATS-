@@ -266,7 +266,8 @@
 // export default generateInterviewReport;
 import Groq from "groq-sdk";
 import { z } from "zod";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -385,7 +386,7 @@ async function generateResumeHTML({ resume, selfDescription, jobDescription }) {
     html: z.string().min(100).describe("Complete single-file HTML resume"),
   });
 
-const prompt = `You are a senior resume writer and ATS-optimization specialist with 15 years
+  const prompt = `You are a senior resume writer and ATS-optimization specialist with 15 years
 of experience writing resumes that get candidates interviews at top tech companies.
 
 You will be given three inputs: a candidate's existing RESUME content, a target
@@ -631,12 +632,11 @@ Hard requirements for that string:
   with </html>) with no unfilled placeholders like "CANDIDATE FULL NAME" left in it.
 - Do not include any text, key, or field besides "html" in the JSON object.`;
 
-
   try {
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.4,   
+      temperature: 0.4,
       response_format: { type: "json_object" },
     });
 
@@ -646,14 +646,17 @@ Hard requirements for that string:
 
     const cleanHtml = html.replace(/^```html|^```|```$/gm, "").trim();
     return cleanHtml;
-
   } catch (err) {
     console.error("generateResumeHTML failed:", err.message);
     throw new Error("Failed to generate resume HTML: " + err.message);
   }
 }
 async function generatePdfFromHTML(htmlContent) {
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    executablePath: await chromium.executablePath(),
+    headless: true,
+  });
   const page = await browser.newPage();
 
   await page.setContent(htmlContent, { waitUntil: "networkidle0" });
@@ -667,4 +670,4 @@ async function generatePdfFromHTML(htmlContent) {
   return pdfBuffer;
 }
 
-export  {generateInterviewReport,generatePdfFromHTML,generateResumeHTML};
+export { generateInterviewReport, generatePdfFromHTML, generateResumeHTML };
