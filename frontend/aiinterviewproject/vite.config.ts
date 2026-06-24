@@ -7,7 +7,7 @@ export default defineConfig({
     proxy: {
       // Whenever frontend requests /api, Vite proxies it to localhost:3000
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://interview-report-generator-and-analyzer.onrender.com',
         changeOrigin: true,
       }
     }
